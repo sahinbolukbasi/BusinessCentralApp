@@ -1,0 +1,71 @@
+trigger:
+  branches:
+    include:
+      - feature/*
+      - release/*
+      - main
+
+pool:
+  name: Azure Pipelines
+  vmImage: "windows-latest"
+
+workspace:
+  clean: all
+
+variables:
+  - name: AppVersion
+    value: ''
+
+steps:
+  - checkout: self
+    persistCredentials: true
+
+  - task: DockerInstaller@0
+    displayName: Docker Installer
+    inputs:
+      dockerVersion: 17.09.0-ce
+      releaseType: stable
+
+  - task: PowerShell@2
+    name: UpdateVersion
+    displayName: "Update Application Version"
+    inputs:
+      targetType: filePath
+      filePath: "UpdateVersion.ps1"
+      workingDirectory: "$(Build.SourcesDirectory)"
+
+  - task: PowerShell@2
+    displayName: "Build AL application"
+    inputs:
+      targetType: filePath
+      filePath: "CompileApp.ps1"
+      arguments: "-Version $(AppVersion)"
+      workingDirectory: "$(Build.SourcesDirectory)"
+
+  - task: PowerShell@2
+    displayName: "Commit Version Update"
+    condition: and(succeeded(), in(variables['Build.SourceBranch'], 'refs/heads/main', 'refs/heads/release/*'))
+    inputs:
+      targetType: 'inline'
+      script: |
+        git config --global user.email "pipeline@parge.com"
+        git config --global user.name "Pipeline Bot"
+        git add app.json
+        git commit -m "Auto-update version to $(AppVersion) [skip ci]"
+        git push origin HEAD:$(Build.SourceBranchName)
+      workingDirectory: "$(Build.SourcesDirectory)"
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: "$(Build.StagingDirectory)"
+      artifactName: "Artifacts-v$(AppVersion)"
+
+  - task: PowerShell@2
+    displayName: "Deploy Application"
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host "Deploying version $(AppVersion) to production..."
+        # Burada deployment scriptlerinizi çalıştırabilirsiniz
+      workingDirectory: "$(Build.SourcesDirectory)"

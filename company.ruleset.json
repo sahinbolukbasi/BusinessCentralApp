@@ -1,0 +1,42 @@
+{
+    "name": "Personal Project ruleset",
+    "description": "A list of project specific rules",
+    "includedRuleSets": [
+        {
+            "action": "Default",
+            "path": "./company.ruleset.json"
+        }
+    ],
+    "rules": [
+        {
+            "id": "AS0051",
+            "action": "None",
+            "justification": "Not an AppSource project."
+        },
+        {
+            "id": "AS0052",
+            "action": "None",
+            "justification": "Not an AppSource project."
+        },
+        {
+            "id": "AS0084",
+            "action": "None",
+            "justification": "Not an AppSource project."
+        },
+        {
+            "id": "AS0092",
+            "action": "None",
+            "justification": "Not an AppSource project."
+        },
+        {
+            "id": "AA0215",
+            "action": "None",
+            "justification": "Not an AppSource project."
+        },
+        {
+            "id": "AS0054",
+            "action": "None",
+            "justification": "Not an AppSource project."
+        }
+    ]
+}
